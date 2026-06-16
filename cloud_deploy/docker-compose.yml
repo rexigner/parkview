@@ -1,0 +1,36 @@
+# ─────────────────────────────────────────────
+#  docker-compose.yml  —  Cloud deployment orchestration
+# ─────────────────────────────────────────────
+
+version: '3.8'
+
+services:
+  parking-bot:
+    build: .
+    container_name: parking-bot
+    restart: unless-stopped
+    environment:
+      - BOT_TOKEN=${BOT_TOKEN}
+      - DB_PATH=/app/data/parking.db
+    volumes:
+      - ./data:/app/data
+    healthcheck:
+      test: ["CMD", "python", "-c", "import sqlite3; sqlite3.connect('/app/data/parking.db')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Optional: Add a web dashboard for monitoring (if needed)
+  # parking-dashboard:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile.dashboard
+  #   container_name: parking-dashboard
+  #   ports:
+  #     - "8080:8080"
+  #   depends_on:
+  #     - parking-bot
+  #   environment:
+  #     - BOT_TOKEN=${BOT_TOKEN}
+  #     - DB_PATH=/app/data/parking.db
