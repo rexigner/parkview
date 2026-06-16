@@ -6,7 +6,10 @@ import streamlit as st
 import sqlite3
 import pandas as pd
 import numpy as np
-import plotly.express as px
+try:
+    import plotly.express as px
+except ModuleNotFoundError:  # allows app to run even if plotly is missing
+    px = None
 import folium
 from datetime import datetime, timedelta
 
@@ -277,8 +280,11 @@ def main():
         if stats['spot_types']:
             st.subheader("Parking Spots by Type")
             spot_type_df = pd.DataFrame(stats['spot_types'], columns=['spot_type', 'count'])
-            fig = px.bar(spot_type_df, x='spot_type', y='count', title="Parking Spots by Type")
-            st.plotly_chart(fig, use_container_width=True)
+            if px is None:
+                st.warning("Plotly is not installed; charts are unavailable.")
+            else:
+                fig = px.bar(spot_type_df, x='spot_type', y='count', title="Parking Spots by Type")
+                st.plotly_chart(fig, use_container_width=True)
         
         # Recent reports
         st.subheader("Recent Reports")
